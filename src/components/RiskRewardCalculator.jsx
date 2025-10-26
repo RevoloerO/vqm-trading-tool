@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { calculateRiskReward } from '../utils/tradingCalculators';
+import Button from './Button';
+import FormInput from './FormInput';
+import ErrorMessage from './ErrorMessage';
+import InfoBadge from './InfoBadge';
+import RelationshipError from './RelationshipError';
 
 function RiskRewardCalculator() {
     // State management
@@ -200,74 +205,52 @@ function RiskRewardCalculator() {
             </div>
 
             <form className="calculator-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label className="form-label">Entry Price</label>
-                    <div className="input-wrapper">
-                        <span className="input-prefix">$</span>
-                        <input
-                            type="number"
-                            className={`form-input ${errors.entry ? 'error' : ''}`}
-                            step="0.01"
-                            value={entryPrice}
-                            onChange={handleEntryChange}
-                            placeholder="50.00"
-                            required
-                        />
-                    </div>
-                    {errors.entry && <span className="field-error">{errors.entry}</span>}
-                </div>
+                <FormInput
+                    label="Entry Price"
+                    value={entryPrice}
+                    onChange={handleEntryChange}
+                    error={errors.entry}
+                    placeholder="50.00"
+                    step="0.01"
+                    prefix="$"
+                    required
+                />
 
-                <div className="form-group">
-                    <label className="form-label">Stop Loss</label>
-                    <div className="input-wrapper">
-                        <span className="input-prefix">$</span>
-                        <input
-                            type="number"
-                            className={`form-input ${errors.stop ? 'error' : ''}`}
-                            step="0.01"
-                            value={stopLoss}
-                            onChange={handleStopChange}
-                            placeholder="48.00"
-                            required
-                        />
-                    </div>
-                    {errors.stop && <span className="field-error">{errors.stop}</span>}
-                </div>
+                <FormInput
+                    label="Stop Loss"
+                    value={stopLoss}
+                    onChange={handleStopChange}
+                    error={errors.stop}
+                    placeholder="48.00"
+                    step="0.01"
+                    prefix="$"
+                    required
+                />
 
-                <div className="form-group">
-                    <label className="form-label">Target Price</label>
-                    <div className="input-wrapper">
-                        <span className="input-prefix">$</span>
-                        <input
-                            type="number"
-                            className={`form-input ${errors.target ? 'error' : ''}`}
-                            step="0.01"
-                            value={targetPrice}
-                            onChange={handleTargetChange}
-                            placeholder="56.00"
-                            required
-                        />
-                    </div>
-                    {errors.target && <span className="field-error">{errors.target}</span>}
-                </div>
+                <FormInput
+                    label="Target Price"
+                    value={targetPrice}
+                    onChange={handleTargetChange}
+                    error={errors.target}
+                    placeholder="56.00"
+                    step="0.01"
+                    prefix="$"
+                    required
+                />
 
-                {errors.relationship && (
-                    <div className="relationship-error">
-                        <span className="field-error">{errors.relationship}</span>
-                    </div>
-                )}
+                <RelationshipError message={errors.relationship} />
 
                 <div className="button-group">
-                    <button
+                    <Button
                         type="submit"
-                        className="btn btn-primary"
+                        variant="primary"
                         disabled={hasErrors()}
                     >
-                        <span className="btn-text">Calculate R:R</span>
-                    </button>
-                    <button type="button" onClick={clearData} className="btn btn-secondary">
-                        <span className="btn-text">Clear</span>
-                    </button>
+                        Calculate R:R
+                    </Button>
+                    <Button type="button" onClick={clearData} variant="secondary">
+                        Clear
+                    </Button>
                 </div>
             </form>
 
@@ -294,25 +277,16 @@ function RiskRewardCalculator() {
                             <span className="result-value success">${result.rewardPerShare}</span>
                         </div>
                     </div>
-                    {!result.isValidTrade && (
-                        <div className="info-badge warning">
-                            R:R ratio is below 1:1. Consider adjusting your targets for better risk management.
-                        </div>
-                    )}
-                    {result.isValidTrade && (
-                        <div className="info-badge success">
-                            Favorable risk/reward ratio detected!
-                        </div>
-                    )}
+                    <InfoBadge
+                        message={!result.isValidTrade
+                            ? "R:R ratio is below 1:1. Consider adjusting your targets for better risk management."
+                            : "Favorable risk/reward ratio detected!"}
+                        variant={result.isValidTrade ? "success" : "warning"}
+                    />
                 </div>
             )}
 
-            {error && (
-                <div className="results-card error">
-                    <h3 className="results-title">Error</h3>
-                    <p className="error-message">{error}</p>
-                </div>
-            )}
+            <ErrorMessage message={error} />
         </div>
     );
 }

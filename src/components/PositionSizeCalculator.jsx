@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { calculatePositionSize } from '../utils/tradingCalculators';
+import Button from './Button';
+import FormInput from './FormInput';
+import ErrorMessage from './ErrorMessage';
 
 function PositionSizeCalculator() {
     // State management
@@ -52,76 +55,52 @@ function PositionSizeCalculator() {
             </div>
 
             <form className="calculator-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label className="form-label">Account Size</label>
-                    <div className="input-wrapper">
-                        <span className="input-prefix">$</span>
-                        <input
-                            type="number"
-                            className="form-input"
-                            value={accountSize}
-                            onChange={(e) => setAccountSize(e.target.value)}
-                            placeholder="10000"
-                            required
-                        />
-                    </div>
-                </div>
+                <FormInput
+                    label="Account Size"
+                    value={accountSize}
+                    onChange={(e) => setAccountSize(e.target.value)}
+                    placeholder="10000"
+                    prefix="$"
+                    required
+                />
 
-                <div className="form-group">
-                    <label className="form-label">Risk Percent</label>
-                    <div className="input-wrapper">
-                        <input
-                            type="number"
-                            className="form-input"
-                            step="0.1"
-                            value={riskPercent}
-                            onChange={(e) => setRiskPercent(e.target.value)}
-                            placeholder="2"
-                            required
-                        />
-                        <span className="input-suffix">%</span>
-                    </div>
-                </div>
+                <FormInput
+                    label="Risk Percent"
+                    value={riskPercent}
+                    onChange={(e) => setRiskPercent(e.target.value)}
+                    placeholder="2"
+                    step="0.1"
+                    suffix="%"
+                    required
+                />
 
-                <div className="form-group">
-                    <label className="form-label">Entry Price</label>
-                    <div className="input-wrapper">
-                        <span className="input-prefix">$</span>
-                        <input
-                            type="number"
-                            className="form-input"
-                            step="0.01"
-                            value={entryPrice}
-                            onChange={(e) => setEntryPrice(e.target.value)}
-                            placeholder="50.00"
-                            required
-                        />
-                    </div>
-                </div>
+                <FormInput
+                    label="Entry Price"
+                    value={entryPrice}
+                    onChange={(e) => setEntryPrice(e.target.value)}
+                    placeholder="50.00"
+                    step="0.01"
+                    prefix="$"
+                    required
+                />
 
-                <div className="form-group">
-                    <label className="form-label">Stop Loss</label>
-                    <div className="input-wrapper">
-                        <span className="input-prefix">$</span>
-                        <input
-                            type="number"
-                            className="form-input"
-                            step="0.01"
-                            value={stopLoss}
-                            onChange={(e) => setStopLoss(e.target.value)}
-                            placeholder="48.00"
-                            required
-                        />
-                    </div>
-                </div>
+                <FormInput
+                    label="Stop Loss"
+                    value={stopLoss}
+                    onChange={(e) => setStopLoss(e.target.value)}
+                    placeholder="48.00"
+                    step="0.01"
+                    prefix="$"
+                    required
+                />
 
                 <div className="button-group">
-                    <button type="submit" className="btn btn-primary">
-                        <span className="btn-text">Calculate Position</span>
-                    </button>
-                    <button type="button" onClick={clearData} className="btn btn-secondary">
-                        <span className="btn-text">Clear</span>
-                    </button>
+                    <Button type="submit" variant="primary">
+                        Calculate Position
+                    </Button>
+                    <Button type="button" onClick={clearData} variant="secondary">
+                        Clear
+                    </Button>
                 </div>
             </form>
 
@@ -155,12 +134,7 @@ function PositionSizeCalculator() {
                 </div>
             )}
 
-            {error && (
-                <div className="results-card error">
-                    <h3 className="results-title">Error</h3>
-                    <p className="error-message">{error}</p>
-                </div>
-            )}
+            <ErrorMessage message={error} />
         </div>
     );
 }
