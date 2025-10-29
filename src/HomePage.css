@@ -124,11 +124,12 @@ body {
 .App {
     min-height: 100vh;
     padding: 2rem 1rem;
+    padding-top: 8rem; /* Space for fixed glass nav */
 }
 
 /* Dashboard Header with Theme Toggle */
 .dashboard-header {
-    max-width: 1400px;
+    max-width: 900px;
     margin: 0 auto 2rem;
     padding: 0 1rem;
     display: flex;
@@ -148,19 +149,20 @@ body {
     margin: 0;
 }
 
-/* Dashboard Container */
+/* Dashboard Container - Single Column Layout */
 .dashboard-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 2rem;
-    max-width: 1400px;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 900px;
     margin: 0 auto;
     padding: 1rem;
 }
 
 @media (max-width: 768px) {
     .dashboard-container {
-        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 0.75rem;
     }
 
     .dashboard-header {
@@ -673,4 +675,21 @@ body {
 
 .loading {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Calculator Section for Navigation */
+.calculator-section {
+    scroll-margin-top: 120px; /* Offset for fixed nav */
+    transition: transform 0.3s ease;
+}
+
+/* Responsive padding adjustments */
+@media (max-width: 768px) {
+    .App {
+        padding-top: 10rem;
+    }
+
+    .calculator-section {
+        scroll-margin-top: 150px;
+    }
 }
