@@ -66,16 +66,20 @@ function MidTimeframeSection({
 
             if (result.success) {
                 setRrResult(result.data);
-                // Auto-check R:R if >= 2:1
+                // Auto-check R:R if >= 2:1 and not already checked
                 const shouldCheck = shouldAutoCheckRR(result.data.rrRatio, 2.0);
                 if (shouldCheck && !checks.rrAtLeast2to1) {
+                    // Pass true as second parameter to set checked state
                     onCheckChange('rrAtLeast2to1', true);
                 }
             } else {
                 setRrResult(null);
             }
+        } else {
+            // Clear result if prices are incomplete
+            setRrResult(null);
         }
-    }, [prices.entry, prices.stop, prices.target]);
+    }, [prices.entry, prices.stop, prices.target, checks.rrAtLeast2to1, onCheckChange]);
 
     // Validate gap percentage
     useEffect(() => {

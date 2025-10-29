@@ -37,7 +37,8 @@ function FinalDecisionPanel({
     const [showPassConfirm, setShowPassConfirm] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-    const styleConfig = TIMEFRAME_CONFIGS[tradingStyle];
+    const styleConfig = TIMEFRAME_CONFIGS[tradingStyle] || TIMEFRAME_CONFIGS['swing'];
+    const labels = timeframeLabels || { higher: 'Weekly', mid: 'Daily', lower: '4-Hour' };
 
     const getStatusBadge = (validation, timeframeName) => {
         if (!validation) return null;
@@ -48,9 +49,9 @@ function FinalDecisionPanel({
         if (validation.isPassed) {
             statusClass += 'success';
             // Context timeframe shows UPTREND, setup shows SETUP CONFIRMED, entry shows ENTRY TRIGGER
-            if (timeframeName === timeframeLabels.higher) {
+            if (timeframeName === labels.higher) {
                 statusText = 'UPTREND';
-            } else if (timeframeName === timeframeLabels.mid) {
+            } else if (timeframeName === labels.mid) {
                 statusText = 'SETUP CONFIRMED';
             } else {
                 statusText = 'ENTRY TRIGGER';
@@ -58,9 +59,9 @@ function FinalDecisionPanel({
         } else {
             statusClass += 'warning';
             // Show what's missing
-            if (timeframeName === timeframeLabels.higher) {
+            if (timeframeName === labels.higher) {
                 statusText = 'NOT ALIGNED';
-            } else if (timeframeName === timeframeLabels.mid) {
+            } else if (timeframeName === labels.mid) {
                 statusText = 'WAITING';
             } else {
                 statusText = 'NO ENTRY';
@@ -85,7 +86,7 @@ function FinalDecisionPanel({
                 <div className="recommendation-reason">{recommendation.reason}</div>
                 <div className="recommendation-details">
                     <span className="detail-icon">🎲</span>
-                    <span>Recommended Risk: {riskPercent}% ({styleConfig?.label} standard)</span>
+                    <span>Recommended Risk: {riskPercent}% ({styleConfig.label} standard)</span>
                 </div>
             </div>
         );
@@ -97,7 +98,7 @@ function FinalDecisionPanel({
             timestamp: new Date().toISOString(),
             recommendation: recommendation,
             tradingStyle: tradingStyle,
-            expectedHoldTime: styleConfig?.holdTime
+            expectedHoldTime: styleConfig.holdTime
         };
 
         // Download trade data as JSON
@@ -150,11 +151,11 @@ function FinalDecisionPanel({
             <div className="final-decision-body">
                 {/* Trading Style Badge */}
                 <div className="trading-style-badge">
-                    <span className="badge-icon">{styleConfig?.icon}</span>
+                    <span className="badge-icon">{styleConfig.icon}</span>
                     <div className="badge-content">
-                        <strong>Trading Style: {styleConfig?.label.toUpperCase()}</strong>
+                        <strong>Trading Style: {styleConfig.label.toUpperCase()}</strong>
                         <span className="badge-subtitle">
-                            Hold Time: {styleConfig?.holdTime} | Trades: {styleConfig?.tradesPerWeek}/week
+                            Hold Time: {styleConfig.holdTime} | Trades: {styleConfig.tradesPerWeek}/week
                         </span>
                     </div>
                 </div>
@@ -164,16 +165,16 @@ function FinalDecisionPanel({
                     <h4 className="status-summary-title">Timeframe Analysis</h4>
                     <div className="status-items">
                         <div className="status-item">
-                            <span className="status-label">{timeframeLabels.higher} Status:</span>
-                            {getStatusBadge(higherValidation, timeframeLabels.higher)}
+                            <span className="status-label">{labels.higher} Status:</span>
+                            {getStatusBadge(higherValidation, labels.higher)}
                         </div>
                         <div className="status-item">
-                            <span className="status-label">{timeframeLabels.mid} Status:</span>
-                            {getStatusBadge(midValidation, timeframeLabels.mid)}
+                            <span className="status-label">{labels.mid} Status:</span>
+                            {getStatusBadge(midValidation, labels.mid)}
                         </div>
                         <div className="status-item">
-                            <span className="status-label">{timeframeLabels.lower} Status:</span>
-                            {getStatusBadge(lowerValidation, timeframeLabels.lower)}
+                            <span className="status-label">{labels.lower} Status:</span>
+                            {getStatusBadge(lowerValidation, labels.lower)}
                         </div>
                     </div>
                 </div>

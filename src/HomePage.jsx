@@ -1,7 +1,7 @@
 import PositionSizeCalculator from './components/PositionSizeCalculator';
 import RiskRewardCalculator from './components/RiskRewardCalculator';
 import MTFChecklist from './components/MTFChecklist/MTFChecklist';
-import ThemeToggle from './components/ThemeToggle/ThemeToggle';
+import ThemeToggle3Way from './components/ThemeToggle/ThemeToggle3Way';
 import './HomePage.css';
 
 export default function HomePage() {
@@ -9,7 +9,7 @@ export default function HomePage() {
         <div className='App'>
             <div className="dashboard-header">
                 <h1 className="dashboard-title">VQM Trading Tools</h1>
-                <ThemeToggle />
+                <ThemeToggle3Way />
             </div>
             <div className="dashboard-container">
                 <PositionSizeCalculator />

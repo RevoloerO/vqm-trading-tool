@@ -21,14 +21,29 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  const cycleTheme = () => {
+    setTheme(prevTheme => {
+      // Cycle: light (bull) → consolidation → dark (bear) → light
+      if (prevTheme === 'light') return 'consolidation';
+      if (prevTheme === 'consolidation') return 'dark';
+      return 'light';
+    });
+  };
+
+  const setSpecificTheme = (newTheme) => {
+    if (['light', 'dark', 'consolidation'].includes(newTheme)) {
+      setTheme(newTheme);
+    }
   };
 
   const value = {
     theme,
-    toggleTheme,
-    isDark: theme === 'dark'
+    cycleTheme,
+    setTheme: setSpecificTheme,
+    isDark: theme === 'dark',
+    isBull: theme === 'light',
+    isBear: theme === 'dark',
+    isConsolidation: theme === 'consolidation'
   };
 
   return (
