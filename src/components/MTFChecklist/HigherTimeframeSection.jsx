@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import ChecklistCheckbox from './ChecklistCheckbox';
 import Button from '../Button';
 import { getValidationRule, getTooltipGuidance } from '../../utils/TimeframeConfig';

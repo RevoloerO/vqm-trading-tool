@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 function RelationshipError({ message }) {
   if (!message) return null;
@@ -10,4 +10,5 @@ function RelationshipError({ message }) {
   );
 }
 
-export default RelationshipError;
+// Memoize to prevent re-renders when parent re-renders but props haven't changed
+export default memo(RelationshipError);

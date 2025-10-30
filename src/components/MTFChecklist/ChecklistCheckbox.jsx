@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 /**
  * Reusable Checkbox Component for MTF Checklist
@@ -66,4 +66,5 @@ function ChecklistCheckbox({
     );
 }
 
-export default ChecklistCheckbox;
+// Memoize to prevent re-renders when parent re-renders but props haven't changed
+export default memo(ChecklistCheckbox);

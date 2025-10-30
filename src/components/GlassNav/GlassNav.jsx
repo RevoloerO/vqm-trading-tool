@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { smoothScrollToWithHighlight, getVisibleSection, scrollToTop, onScroll } from '../../utils/smoothScroll';
 import './GlassNav.css';
 
 export default function GlassNav() {
     const [activeSection, setActiveSection] = useState('position-size');
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isScrolling, setIsScrolling] = useState(false);
 
     const navItems = [
         {
@@ -26,41 +28,49 @@ export default function GlassNav() {
         }
     ];
 
+    const sectionIds = navItems.map(item => item.id);
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
 
-            // Detect which section is in view
-            const sections = navItems.map(item =>
-                document.getElementById(item.id)
-            );
-
-            const scrollPosition = window.scrollY + window.innerHeight / 3;
-
-            for (let i = sections.length - 1; i >= 0; i--) {
-                const section = sections[i];
-                if (section && section.offsetTop <= scrollPosition) {
-                    setActiveSection(navItems[i].id);
-                    break;
-                }
+            // Detect which section is most visible using improved algorithm
+            const visibleSection = getVisibleSection(sectionIds, 0.3);
+            if (visibleSection) {
+                setActiveSection(visibleSection);
             }
         };
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        // Use optimized scroll listener with throttling
+        const cleanup = onScroll(handleScroll, 100);
+        handleScroll(); // Initial check
+
+        return cleanup;
     }, []);
 
-    const scrollToSection = (sectionId) => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-            const offset = 100; // Offset for fixed nav
-            const elementPosition = element.offsetTop - offset;
-            window.scrollTo({
-                top: elementPosition,
-                behavior: 'smooth'
-            });
-            setActiveSection(sectionId);
-        }
+    const scrollToSection = async (sectionId) => {
+        setActiveSection(sectionId);
+        setIsScrolling(true);
+
+        // Smooth scroll with highlight effect
+        await smoothScrollToWithHighlight(`#${sectionId}`, {
+            duration: 800,
+            offset: 100,
+            easing: 'easeInOutCubic'
+        });
+
+        setIsScrolling(false);
+    };
+
+    const handleScrollToTop = async () => {
+        setIsScrolling(true);
+
+        await scrollToTop({
+            duration: 600,
+            easing: 'easeOutExpo'
+        });
+
+        setIsScrolling(false);
     };
 
     return (
@@ -94,9 +104,10 @@ export default function GlassNav() {
 
                 <div className="glass-nav-actions">
                     <button
-                        className="nav-scroll-top"
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className={`nav-scroll-top ${isScrolling ? 'scrolling' : ''}`}
+                        onClick={handleScrollToTop}
                         aria-label="Scroll to top"
+                        disabled={isScrolling}
                     >
                         ↑
                     </button>

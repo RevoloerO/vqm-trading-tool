@@ -11,6 +11,7 @@ const EXPIRATION_HOURS = 24;
 /**
  * Save checklist state to localStorage with timestamp
  * @param {Object} state - Checklist state to save
+ * @returns {boolean} True if save successful, false otherwise
  */
 export function saveChecklistState(state) {
     try {
@@ -20,10 +21,47 @@ export function saveChecklistState(state) {
             version: '1.0' // For future migrations
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
+        return true;
     } catch (error) {
-        console.error('Failed to save checklist state:', error);
-        // Silently fail - don't break the app if localStorage is unavailable
+        // Handle quota exceeded error
+        if (error.name === 'QuotaExceededError') {
+            // Try to clear old data and retry
+            try {
+                clearChecklistState();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
+                return true;
+            } catch (retryError) {
+                // If still fails, notify user
+                if (typeof window !== 'undefined' && window.alert) {
+                    alert('Storage quota exceeded. Unable to save checklist. Please clear browser data or export your work.');
+                }
+                return false;
+            }
+        }
+
+        // Log other errors but don't break the app
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to save checklist state:', error);
+        }
+        return false;
     }
+}
+
+/**
+ * Validate loaded state structure to prevent corrupted data from breaking the app
+ * @param {any} state - State to validate
+ * @returns {boolean} True if state is valid
+ */
+function validateStateStructure(state) {
+    if (!state || typeof state !== 'object') return false;
+
+    // Check required properties exist
+    if (!state.tradingStyle || !state.currentStep) return false;
+
+    // Check timeframe objects exist
+    if (!state.higherTF || !state.midTF || !state.lowerTF) return false;
+
+    return true;
 }
 
 /**
@@ -37,6 +75,13 @@ export function loadChecklistState() {
         if (!stored) return null;
 
         const data = JSON.parse(stored);
+
+        // Validate data structure
+        if (!data || typeof data !== 'object' || !data.state || !data.timestamp) {
+            clearChecklistState();
+            return null;
+        }
+
         const currentTime = new Date().getTime();
         const expirationTime = EXPIRATION_HOURS * 60 * 60 * 1000; // Convert to milliseconds
 
@@ -46,9 +91,20 @@ export function loadChecklistState() {
             return null;
         }
 
+        // Validate state structure before returning
+        if (!validateStateStructure(data.state)) {
+            clearChecklistState();
+            return null;
+        }
+
         return data.state;
     } catch (error) {
-        console.error('Failed to load checklist state:', error);
+        // Corrupted data - clear it and start fresh
+        clearChecklistState();
+
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to load checklist state:', error);
+        }
         return null;
     }
 }

@@ -1,9 +1,26 @@
-import PositionSizeCalculator from './components/PositionSizeCalculator';
-import RiskRewardCalculator from './components/RiskRewardCalculator';
-import MTFChecklist from './components/MTFChecklist/MTFChecklist';
+import { lazy, Suspense } from 'react';
 import ThemeToggle3Way from './components/ThemeToggle/ThemeToggle3Way';
 import GlassNav from './components/GlassNav/GlassNav';
 import './HomePage.css';
+
+// Code splitting: Lazy load calculator components for better performance
+const PositionSizeCalculator = lazy(() => import('./components/PositionSizeCalculator'));
+const RiskRewardCalculator = lazy(() => import('./components/RiskRewardCalculator'));
+const MTFChecklist = lazy(() => import('./components/MTFChecklist/MTFChecklistRefactored'));
+
+// Loading fallback component
+function LoadingFallback() {
+    return (
+        <div style={{
+            padding: '2rem',
+            textAlign: 'center',
+            color: 'var(--text-color, #666)',
+            fontStyle: 'italic'
+        }}>
+            Loading calculator...
+        </div>
+    );
+}
 
 export default function HomePage() {
     return (
@@ -16,17 +33,23 @@ export default function HomePage() {
             </div>
 
             <div className="dashboard-container">
-                <section id="position-size" className="calculator-section">
-                    <PositionSizeCalculator />
-                </section>
+                <Suspense fallback={<LoadingFallback />}>
+                    <section id="position-size" className="calculator-section">
+                        <PositionSizeCalculator />
+                    </section>
+                </Suspense>
 
-                <section id="risk-reward" className="calculator-section">
-                    <RiskRewardCalculator />
-                </section>
+                <Suspense fallback={<LoadingFallback />}>
+                    <section id="risk-reward" className="calculator-section">
+                        <RiskRewardCalculator />
+                    </section>
+                </Suspense>
 
-                <section id="mtf-checklist" className="calculator-section">
-                    <MTFChecklist />
-                </section>
+                <Suspense fallback={<LoadingFallback />}>
+                    <section id="mtf-checklist" className="calculator-section">
+                        <MTFChecklist />
+                    </section>
+                </Suspense>
             </div>
         </div>
     );

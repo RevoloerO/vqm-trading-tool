@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 function ErrorMessage({ message, title = "Error" }) {
   if (!message) return null;
@@ -11,4 +11,5 @@ function ErrorMessage({ message, title = "Error" }) {
   );
 }
 
-export default ErrorMessage;
+// Memoize to prevent re-renders when parent re-renders but props haven't changed
+export default memo(ErrorMessage);

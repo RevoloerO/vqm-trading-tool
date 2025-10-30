@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 function InfoBadge({ message, variant = "success" }) {
   if (!message) return null;
@@ -10,4 +10,5 @@ function InfoBadge({ message, variant = "success" }) {
   );
 }
 
-export default InfoBadge;
+// Memoize to prevent re-renders when parent re-renders but props haven't changed
+export default memo(InfoBadge);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { calculatePositionSize } from '../utils/tradingCalculators';
 import Button from './Button';
 import FormInput from './FormInput';

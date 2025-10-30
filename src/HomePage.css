@@ -114,6 +114,11 @@
 }
 
 /* Global Styles */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 120px; /* Offset for fixed nav */
+}
+
 body {
     background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
     min-height: 100vh;
@@ -683,6 +688,64 @@ body {
     transition: transform 0.3s ease;
 }
 
+/* Scroll highlight animation */
+.scroll-highlight {
+    animation: highlight-pulse 1s ease-out;
+}
+
+@keyframes highlight-pulse {
+    0% {
+        box-shadow: 0 0 0 0 var(--primary-accent);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.3);
+        transform: scale(1.01);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        transform: scale(1);
+    }
+}
+
+[data-theme="dark"] .scroll-highlight {
+    animation: highlight-pulse-dark 1s ease-out;
+}
+
+@keyframes highlight-pulse-dark {
+    0% {
+        box-shadow: 0 0 0 0 var(--primary-accent);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.3);
+        transform: scale(1.01);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        transform: scale(1);
+    }
+}
+
+[data-theme="consolidation"] .scroll-highlight {
+    animation: highlight-pulse-gold 1s ease-out;
+}
+
+@keyframes highlight-pulse-gold {
+    0% {
+        box-shadow: 0 0 0 0 var(--primary-accent);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(217, 119, 6, 0.3);
+        transform: scale(1.01);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+        transform: scale(1);
+    }
+}
+
 /* Responsive padding adjustments */
 @media (max-width: 768px) {
     .App {
@@ -691,5 +754,12 @@ body {
 
     .calculator-section {
         scroll-margin-top: 150px;
+    }
+}
+
+/* Disable animations for reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .scroll-highlight {
+        animation: none;
     }
 }

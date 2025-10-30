@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 function Button({ children, onClick, variant = "primary", disabled = false, type = "button" }) {
   return (
@@ -13,4 +13,5 @@ function Button({ children, onClick, variant = "primary", disabled = false, type
   );
 }
 
-export default Button;
+// Memoize to prevent re-renders when parent re-renders but props haven't changed
+export default memo(Button);

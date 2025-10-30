@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { calculateRiskReward } from '../utils/tradingCalculators';
+import { useDebounce } from '../hooks/useDebounce';
 import Button from './Button';
 import FormInput from './FormInput';
 import ErrorMessage from './ErrorMessage';
@@ -13,6 +14,11 @@ function RiskRewardCalculator() {
     const [targetPrice, setTargetPrice] = useState('');
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+
+    // Debounced values - validation only runs after user stops typing (300ms delay)
+    const debouncedEntry = useDebounce(entryPrice, 300);
+    const debouncedStop = useDebounce(stopLoss, 300);
+    const debouncedTarget = useDebounce(targetPrice, 300);
 
     // Field-specific error state
     const [errors, setErrors] = useState({
@@ -88,51 +94,32 @@ function RiskRewardCalculator() {
         return null;
     };
 
-    // Handle Entry Price change
-    const handleEntryChange = (e) => {
-        const value = e.target.value;
-        setEntryPrice(value);
-
-        const entryError = validateEntry(value);
-        const stopError = validateStop(stopLoss, value);
-        const relationshipError = validateRelationship(value, stopLoss, targetPrice);
+    // Debounced validation - only runs after user stops typing
+    useEffect(() => {
+        const entryError = validateEntry(debouncedEntry);
+        const stopError = validateStop(debouncedStop, debouncedEntry);
+        const targetError = validateTarget(debouncedTarget);
+        const relationshipError = validateRelationship(debouncedEntry, debouncedStop, debouncedTarget);
 
         setErrors({
-            ...errors,
             entry: entryError,
-            stop: stopError || errors.stop,
-            relationship: relationshipError
-        });
-    };
-
-    // Handle Stop Loss change
-    const handleStopChange = (e) => {
-        const value = e.target.value;
-        setStopLoss(value);
-
-        const stopError = validateStop(value, entryPrice);
-        const relationshipError = validateRelationship(entryPrice, value, targetPrice);
-
-        setErrors({
-            ...errors,
             stop: stopError,
-            relationship: relationshipError
-        });
-    };
-
-    // Handle Target Price change
-    const handleTargetChange = (e) => {
-        const value = e.target.value;
-        setTargetPrice(value);
-
-        const targetError = validateTarget(value);
-        const relationshipError = validateRelationship(entryPrice, stopLoss, value);
-
-        setErrors({
-            ...errors,
             target: targetError,
             relationship: relationshipError
         });
+    }, [debouncedEntry, debouncedStop, debouncedTarget]);
+
+    // Simplified handlers - just update state, validation happens automatically via debounce
+    const handleEntryChange = (e) => {
+        setEntryPrice(e.target.value);
+    };
+
+    const handleStopChange = (e) => {
+        setStopLoss(e.target.value);
+    };
+
+    const handleTargetChange = (e) => {
+        setTargetPrice(e.target.value);
     };
 
     // Check if form has any errors

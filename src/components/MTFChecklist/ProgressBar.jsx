@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 /**
  * Progress Bar Component showing checklist completion
@@ -130,4 +130,5 @@ function calculateProgress(validation) {
     return Math.round((completedSteps / totalSteps) * 100);
 }
 
-export default ProgressBar;
+// Memoize to prevent re-renders when parent re-renders but props haven't changed
+export default memo(ProgressBar);

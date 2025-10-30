@@ -508,6 +508,26 @@
     outline-offset: 2px;
 }
 
+/* Scrolling state */
+.nav-scroll-top.scrolling {
+    animation: scrolling-pulse 0.6s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes scrolling-pulse {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-3px) scale(1.1);
+    }
+}
+
+.nav-scroll-top:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .glass-nav,
@@ -518,5 +538,9 @@
     .nav-scroll-top {
         transition: none;
         animation: none;
+    }
+
+    html {
+        scroll-behavior: auto !important;
     }
 }
