@@ -1,0 +1,1 @@
+import{r,j as s}from"./vendor-react-CTd1lJGF.js";const e=r.memo(function({message:r,title:e="Error"}){return r?s.jsxs("div",{className:"results-card error",children:[s.jsx("h3",{className:"results-title",children:e}),s.jsx("p",{className:"error-message",children:r})]}):null});export{e as E};
