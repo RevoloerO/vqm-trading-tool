@@ -1,26 +1,13 @@
 import { lazy, Suspense } from 'react';
 import ThemeToggle3Way from './components/ThemeToggle/ThemeToggle3Way';
 import GlassNav from './components/GlassNav/GlassNav';
+import SkeletonLoader from './components/SkeletonLoader';
 import './HomePage.css';
 
 // Code splitting: Lazy load calculator components for better performance
 const PositionSizeCalculator = lazy(() => import('./components/PositionSizeCalculator'));
 const RiskRewardCalculator = lazy(() => import('./components/RiskRewardCalculator'));
 const MTFChecklist = lazy(() => import('./components/MTFChecklist/MTFChecklistRefactored'));
-
-// Loading fallback component
-function LoadingFallback() {
-    return (
-        <div style={{
-            padding: '2rem',
-            textAlign: 'center',
-            color: 'var(--text-color, #666)',
-            fontStyle: 'italic'
-        }}>
-            Loading calculator...
-        </div>
-    );
-}
 
 export default function HomePage() {
     return (
@@ -33,19 +20,19 @@ export default function HomePage() {
             </div>
 
             <div className="dashboard-container">
-                <Suspense fallback={<LoadingFallback />}>
+                <Suspense fallback={<SkeletonLoader type="calculator" />}>
                     <section id="position-size" className="calculator-section">
                         <PositionSizeCalculator />
                     </section>
                 </Suspense>
 
-                <Suspense fallback={<LoadingFallback />}>
+                <Suspense fallback={<SkeletonLoader type="calculator" />}>
                     <section id="risk-reward" className="calculator-section">
                         <RiskRewardCalculator />
                     </section>
                 </Suspense>
 
-                <Suspense fallback={<LoadingFallback />}>
+                <Suspense fallback={<SkeletonLoader type="checklist" />}>
                     <section id="mtf-checklist" className="calculator-section">
                         <MTFChecklist />
                     </section>

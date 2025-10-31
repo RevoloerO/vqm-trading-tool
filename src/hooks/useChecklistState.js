@@ -112,7 +112,6 @@ export function useChecklistState() {
                 checklistState: selectors.getSerializableState(clState)
             };
             saveChecklistState(stateToSave);
-            console.log('[Auto-save] Checklist state saved');
         }
     }, 2000);
 
@@ -134,7 +133,6 @@ export function useChecklistState() {
                 checklistState: selectors.getSerializableState(checklistState)
             };
             saveChecklistState(stateToSave);
-            console.log('[Manual save] Checklist state saved');
         }
     }, [tradingStyle, timeframeConfig, checklistState]);
 

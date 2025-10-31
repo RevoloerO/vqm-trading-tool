@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { calculateRiskReward } from '../utils/tradingCalculators';
 import { useDebounce } from '../hooks/useDebounce';
+import { TRADING_LIMITS, VALIDATION_MESSAGES } from '../constants/tradingLimits';
 import Button from './Button';
 import FormInput from './FormInput';
 import ErrorMessage from './ErrorMessage';
@@ -14,6 +15,12 @@ function RiskRewardCalculator() {
     const [targetPrice, setTargetPrice] = useState('');
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [isCalculating, setIsCalculating] = useState(false);
+
+    // Refs for focus management
+    const entryRef = useRef(null);
+    const stopRef = useRef(null);
+    const targetRef = useRef(null);
 
     // Debounced values - validation only runs after user stops typing (300ms delay)
     const debouncedEntry = useDebounce(entryPrice, 300);
@@ -28,17 +35,16 @@ function RiskRewardCalculator() {
         relationship: null
     });
 
-    const MAX_PRICE = 100000; // Max $100k per share
-
     // Real-time validation for Entry Price
     const validateEntry = (value) => {
         if (!value || value === '') return null;
 
         const num = parseFloat(value);
-        if (isNaN(num)) return 'Must be a valid number';
-        if (!isFinite(num)) return 'Must be a finite number';
-        if (num <= 0) return 'Must be greater than zero';
-        if (num > MAX_PRICE) return `Cannot exceed $${MAX_PRICE.toLocaleString()}`;
+        if (isNaN(num)) return VALIDATION_MESSAGES.MUST_BE_NUMBER;
+        if (!isFinite(num)) return VALIDATION_MESSAGES.MUST_BE_FINITE;
+        if (num <= 0) return VALIDATION_MESSAGES.MUST_BE_POSITIVE;
+        if (num < TRADING_LIMITS.MIN_PRICE) return VALIDATION_MESSAGES.PRICE_TOO_LOW;
+        if (num > TRADING_LIMITS.MAX_PRICE) return VALIDATION_MESSAGES.PRICE_TOO_HIGH;
 
         return null;
     };
@@ -48,14 +54,15 @@ function RiskRewardCalculator() {
         if (!value || value === '') return null;
 
         const num = parseFloat(value);
-        if (isNaN(num)) return 'Must be a valid number';
-        if (!isFinite(num)) return 'Must be a finite number';
-        if (num <= 0) return 'Must be greater than zero';
-        if (num > MAX_PRICE) return `Cannot exceed $${MAX_PRICE.toLocaleString()}`;
+        if (isNaN(num)) return VALIDATION_MESSAGES.MUST_BE_NUMBER;
+        if (!isFinite(num)) return VALIDATION_MESSAGES.MUST_BE_FINITE;
+        if (num <= 0) return VALIDATION_MESSAGES.MUST_BE_POSITIVE;
+        if (num < TRADING_LIMITS.MIN_PRICE) return VALIDATION_MESSAGES.PRICE_TOO_LOW;
+        if (num > TRADING_LIMITS.MAX_PRICE) return VALIDATION_MESSAGES.PRICE_TOO_HIGH;
 
         // Check if stop equals entry (division by zero)
         if (entryValue && parseFloat(entryValue) === num) {
-            return 'Cannot equal entry price';
+            return VALIDATION_MESSAGES.STOP_EQUALS_ENTRY;
         }
 
         return null;
@@ -66,10 +73,11 @@ function RiskRewardCalculator() {
         if (!value || value === '') return null;
 
         const num = parseFloat(value);
-        if (isNaN(num)) return 'Must be a valid number';
-        if (!isFinite(num)) return 'Must be a finite number';
-        if (num <= 0) return 'Must be greater than zero';
-        if (num > MAX_PRICE) return `Cannot exceed $${MAX_PRICE.toLocaleString()}`;
+        if (isNaN(num)) return VALIDATION_MESSAGES.MUST_BE_NUMBER;
+        if (!isFinite(num)) return VALIDATION_MESSAGES.MUST_BE_FINITE;
+        if (num <= 0) return VALIDATION_MESSAGES.MUST_BE_POSITIVE;
+        if (num < TRADING_LIMITS.MIN_PRICE) return VALIDATION_MESSAGES.PRICE_TOO_LOW;
+        if (num > TRADING_LIMITS.MAX_PRICE) return VALIDATION_MESSAGES.PRICE_TOO_HIGH;
 
         return null;
     };
@@ -88,7 +96,7 @@ function RiskRewardCalculator() {
         const isShortPosition = s > e && t < e;
 
         if (!isLongPosition && !isShortPosition) {
-            return 'Invalid setup. Long: Stop < Entry < Target. Short: Target < Entry < Stop';
+            return VALIDATION_MESSAGES.INVALID_POSITION_SETUP;
         }
 
         return null;
@@ -109,6 +117,17 @@ function RiskRewardCalculator() {
         });
     }, [debouncedEntry, debouncedStop, debouncedTarget]);
 
+    // Error focus management - focus first field with error
+    useEffect(() => {
+        if (errors.entry && entryRef.current) {
+            entryRef.current.focus();
+        } else if (errors.stop && stopRef.current) {
+            stopRef.current.focus();
+        } else if (errors.target && targetRef.current) {
+            targetRef.current.focus();
+        }
+    }, [errors.entry, errors.stop, errors.target]);
+
     // Simplified handlers - just update state, validation happens automatically via debounce
     const handleEntryChange = (e) => {
         setEntryPrice(e.target.value);
@@ -128,7 +147,13 @@ function RiskRewardCalculator() {
     };
 
     // Calculation logic using centralized API handler
-    const calculateRR = () => {
+    const calculateRR = async () => {
+        // Set loading state
+        setIsCalculating(true);
+
+        // Small delay to show loading state (simulates processing)
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         // Final validation before calculation
         const entryError = validateEntry(entryPrice);
         const stopError = validateStop(stopLoss, entryPrice);
@@ -144,6 +169,7 @@ function RiskRewardCalculator() {
             });
             setResult(null);
             setError('Please fix the errors above before calculating');
+            setIsCalculating(false);
             return;
         }
 
@@ -160,6 +186,8 @@ function RiskRewardCalculator() {
             setResult(null);
             setError(response.error);
         }
+
+        setIsCalculating(false);
     };
 
     // Event handler
@@ -193,6 +221,7 @@ function RiskRewardCalculator() {
 
             <form className="calculator-form" onSubmit={handleSubmit}>
                 <FormInput
+                    ref={entryRef}
                     label="Entry Price"
                     value={entryPrice}
                     onChange={handleEntryChange}
@@ -204,6 +233,7 @@ function RiskRewardCalculator() {
                 />
 
                 <FormInput
+                    ref={stopRef}
                     label="Stop Loss"
                     value={stopLoss}
                     onChange={handleStopChange}
@@ -215,6 +245,7 @@ function RiskRewardCalculator() {
                 />
 
                 <FormInput
+                    ref={targetRef}
                     label="Target Price"
                     value={targetPrice}
                     onChange={handleTargetChange}
@@ -231,11 +262,16 @@ function RiskRewardCalculator() {
                     <Button
                         type="submit"
                         variant="primary"
-                        disabled={hasErrors()}
+                        disabled={hasErrors() || isCalculating}
                     >
-                        Calculate R:R
+                        {isCalculating ? 'Calculating...' : 'Calculate R:R'}
                     </Button>
-                    <Button type="button" onClick={clearData} variant="secondary">
+                    <Button
+                        type="button"
+                        onClick={clearData}
+                        variant="secondary"
+                        disabled={isCalculating}
+                    >
                         Clear
                     </Button>
                 </div>

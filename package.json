@@ -2,7 +2,7 @@
   "name": "vqm-trading-tool",
   "private": true,
   "version": "1.0.0",
-  "homepage": "revoloero.github.io/vqm-trading-tool",
+  "homepage": "https://revoloero.github.io/vqm-trading-tool",
   "type": "module",
   "scripts": {
     "dev": "vite",

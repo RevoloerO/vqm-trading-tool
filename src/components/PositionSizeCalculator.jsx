@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { calculatePositionSize } from '../utils/tradingCalculators';
 import Button from './Button';
 import FormInput from './FormInput';
@@ -12,9 +12,41 @@ function PositionSizeCalculator() {
     const [stopLoss, setStopLoss] = useState('');
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [isCalculating, setIsCalculating] = useState(false);
+    const [errorField, setErrorField] = useState(null);
+
+    // Refs for focus management
+    const accountRef = useRef(null);
+    const riskRef = useRef(null);
+    const entryRef = useRef(null);
+    const stopRef = useRef(null);
+
+    // Error focus management - focus field with error
+    useEffect(() => {
+        if (!errorField) return;
+
+        const focusMap = {
+            'accountSize': accountRef,
+            'riskPercent': riskRef,
+            'entryPrice': entryRef,
+            'stopLoss': stopRef
+        };
+
+        const targetRef = focusMap[errorField];
+        if (targetRef && targetRef.current) {
+            targetRef.current.focus();
+        }
+    }, [errorField]);
 
     // Calculation logic using centralized API handler
-    const calculatePosition = () => {
+    const calculatePosition = async () => {
+        // Set loading state
+        setIsCalculating(true);
+        setErrorField(null);
+
+        // Small delay to show loading state (simulates processing)
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const response = calculatePositionSize({
             accountSize,
             riskPercent,
@@ -25,10 +57,14 @@ function PositionSizeCalculator() {
         if (response.success) {
             setResult(response.data);
             setError(null);
+            setErrorField(null);
         } else {
             setResult(null);
             setError(response.error);
+            setErrorField(response.field || null);
         }
+
+        setIsCalculating(false);
     };
 
     // Event handler
@@ -56,6 +92,7 @@ function PositionSizeCalculator() {
 
             <form className="calculator-form" onSubmit={handleSubmit}>
                 <FormInput
+                    ref={accountRef}
                     label="Account Size"
                     value={accountSize}
                     onChange={(e) => setAccountSize(e.target.value)}
@@ -65,6 +102,7 @@ function PositionSizeCalculator() {
                 />
 
                 <FormInput
+                    ref={riskRef}
                     label="Risk Percent"
                     value={riskPercent}
                     onChange={(e) => setRiskPercent(e.target.value)}
@@ -75,6 +113,7 @@ function PositionSizeCalculator() {
                 />
 
                 <FormInput
+                    ref={entryRef}
                     label="Entry Price"
                     value={entryPrice}
                     onChange={(e) => setEntryPrice(e.target.value)}
@@ -85,6 +124,7 @@ function PositionSizeCalculator() {
                 />
 
                 <FormInput
+                    ref={stopRef}
                     label="Stop Loss"
                     value={stopLoss}
                     onChange={(e) => setStopLoss(e.target.value)}
@@ -95,10 +135,19 @@ function PositionSizeCalculator() {
                 />
 
                 <div className="button-group">
-                    <Button type="submit" variant="primary">
-                        Calculate Position
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={isCalculating}
+                    >
+                        {isCalculating ? 'Calculating...' : 'Calculate Position'}
                     </Button>
-                    <Button type="button" onClick={clearData} variant="secondary">
+                    <Button
+                        type="button"
+                        onClick={clearData}
+                        variant="secondary"
+                        disabled={isCalculating}
+                    >
                         Clear
                     </Button>
                 </div>

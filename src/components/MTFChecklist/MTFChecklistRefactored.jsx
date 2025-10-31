@@ -8,7 +8,7 @@
  */
 
 import { useMemo, useEffect, useCallback } from 'react';
-import { useMTFChecklistStateOptimized } from '../../hooks/useMTFChecklistStateOptimized';
+import { useChecklistState } from '../../hooks/useChecklistState';
 import { useMTFValidationOptimized } from '../../hooks/useMTFValidationOptimized';
 import ChecklistHeader from './ChecklistHeader';
 import TradingStyleSelector from './TradingStyleSelector';
@@ -25,12 +25,17 @@ import './MTFChecklist.css';
  * Main container component - orchestrates the checklist flow
  */
 function MTFChecklist() {
-    // Custom hook for state management (OPTIMIZED)
+    // Custom hook for state management (REDUCER PATTERN)
     const {
-        state,
+        tradingStyle,
+        timeframeConfig,
+        checklistState,
         styleConfig,
         showRestorePrompt,
         showChangeStyleConfirm,
+        currentStep,
+        isMidLocked,
+        isLowerLocked,
         handleStyleSelect,
         handleChangeStyle,
         cancelChangeStyle,
@@ -52,7 +57,7 @@ function MTFChecklist() {
         restoreSavedState,
         dismissRestorePrompt,
         updateValidationResults
-    } = useMTFChecklistStateOptimized();
+    } = useChecklistState();
 
     // Custom hook for validation logic (OPTIMIZED)
     const {
@@ -60,12 +65,10 @@ function MTFChecklist() {
         midValidation,
         lowerValidation,
         recommendation,
-        isMidLocked,
-        isLowerLocked,
         recommendedRiskPercent,
         timeframeLabels,
         validationResults
-    } = useMTFValidationOptimized(state, styleConfig);
+    } = useMTFValidationOptimized(checklistState, styleConfig, tradingStyle, timeframeConfig);
 
     // Update state with validation results
     useEffect(() => {
@@ -109,24 +112,24 @@ function MTFChecklist() {
 
     // Memoized position result for final panel - only recalculate when position data changes
     const positionResult = useMemo(() => {
-        return state.lowerTF.positionData.accountSize ? {
+        return checklistState.lowerTF.positionData.accountSize ? {
             shares: 0,
             positionValue: '0.00',
             riskAmount: '0.00',
             riskPerShare: '0.00'
         } : null;
-    }, [state.lowerTF.positionData.accountSize]);
+    }, [checklistState.lowerTF.positionData.accountSize]);
 
     // =========================================================================
     // RENDER: Style Selection Screen
     // =========================================================================
-    if (state.currentStep === 'styleSelection' || !state.tradingStyle) {
+    if (currentStep === 'styleSelection' || !tradingStyle) {
         return (
             <div className="calculator-card mtf-checklist">
                 <ChecklistHeader />
                 <TradingStyleSelector
                     onStyleSelect={handleStyleSelect}
-                    currentStyle={state.tradingStyle}
+                    currentStyle={tradingStyle}
                 />
             </div>
         );
@@ -167,7 +170,7 @@ function MTFChecklist() {
 
             {/* Progress Bar */}
             <ProgressBar
-                currentStep={state.currentStep}
+                currentStep={currentStep}
                 validation={{
                     higher: higherValidation,
                     mid: midValidation,
@@ -177,52 +180,52 @@ function MTFChecklist() {
             />
 
             {/* Higher Timeframe Section */}
-            {(state.currentStep === 'higher' || higherValidation?.isPassed) && (
+            {(currentStep === 'higher' || higherValidation?.isPassed) && (
                 <HigherTimeframeSection
                     timeframeName={timeframeLabels.higher}
-                    timeframeCode={state.timeframeConfig.higher}
-                    tradingStyle={state.tradingStyle}
-                    checks={state.higherTF}
+                    timeframeCode={timeframeConfig.higher}
+                    tradingStyle={tradingStyle}
+                    checks={checklistState.higherTF}
                     onCheckChange={updateHigherTF}
                     onContinue={handleHigherContinue}
                     validation={higherValidation}
-                    isLocked={state.currentStep !== 'higher'}
+                    isLocked={currentStep !== 'higher'}
                 />
             )}
 
             {/* Mid Timeframe Section */}
-            {(state.currentStep === 'mid' || midValidation?.isPassed) && !isMidLocked && (
+            {(currentStep === 'mid' || midValidation?.isPassed) && !isMidLocked && (
                 <MidTimeframeSection
                     timeframeName={timeframeLabels.mid}
-                    timeframeCode={state.timeframeConfig.mid}
+                    timeframeCode={timeframeConfig.mid}
                     higherTimeframeName={timeframeLabels.higher}
                     lowerTimeframeName={timeframeLabels.lower}
-                    tradingStyle={state.tradingStyle}
-                    checks={state.midTF}
+                    tradingStyle={tradingStyle}
+                    checks={checklistState.midTF}
                     onCheckChange={updateMidTF}
-                    patternType={state.midTF.patternType}
+                    patternType={checklistState.midTF.patternType}
                     onPatternTypeChange={updatePatternType}
-                    gapPercentage={state.midTF.gapPercentage}
+                    gapPercentage={checklistState.midTF.gapPercentage}
                     onGapPercentageChange={updateGapPercentage}
-                    prices={state.midTF.prices}
+                    prices={checklistState.midTF.prices}
                     onPriceChange={updateMidPrice}
                     onContinue={handleMidContinue}
                     onBack={backToHigher}
                     validation={midValidation}
-                    isLocked={state.currentStep !== 'mid'}
+                    isLocked={currentStep !== 'mid'}
                 />
             )}
 
             {/* Lower Timeframe Section */}
-            {state.currentStep === 'lower' && !isLowerLocked && (
+            {currentStep === 'lower' && !isLowerLocked && (
                 <LowerTimeframeSection
                     timeframeName={timeframeLabels.lower}
-                    timeframeCode={state.timeframeConfig.lower}
+                    timeframeCode={timeframeConfig.lower}
                     midTimeframeName={timeframeLabels.mid}
-                    tradingStyle={state.tradingStyle}
-                    checks={state.lowerTF}
+                    tradingStyle={tradingStyle}
+                    checks={checklistState.lowerTF}
                     onCheckChange={updateLowerTF}
-                    positionData={state.lowerTF.positionData}
+                    positionData={checklistState.lowerTF.positionData}
                     onPositionDataChange={updatePositionData}
                     recommendedRiskPercent={recommendedRiskPercent}
                     onContinue={handleLowerContinue}
@@ -233,20 +236,20 @@ function MTFChecklist() {
             )}
 
             {/* Final Decision Panel */}
-            {state.currentStep === 'final' && (
+            {currentStep === 'final' && (
                 <FinalDecisionPanel
                     higherValidation={higherValidation}
                     midValidation={midValidation}
                     lowerValidation={lowerValidation}
                     recommendation={recommendation}
                     positionResult={positionResult}
-                    tradingStyle={state.tradingStyle}
+                    tradingStyle={tradingStyle}
                     timeframeLabels={timeframeLabels}
                     onExecuteTrade={handleExecuteTrade}
                     onPassTrade={handlePassTrade}
                     onSaveForLater={handleSaveForLater}
                     onReset={resetChecklist}
-                    fullState={state}
+                    fullState={checklistState}
                 />
             )}
         </div>

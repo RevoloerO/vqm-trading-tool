@@ -23,7 +23,33 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Variable and import rules
+      'no-unused-vars': ['error', {
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
+
+      // Console rules - warn in development, error in production
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+
+      // Debugging rules
+      'no-debugger': 'error',
+      'no-alert': 'warn',
+
+      // Code quality rules
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'prefer-const': 'error',
+      'no-var': 'error',
+
+      // React Hooks rules (already extended, but explicitly listed for clarity)
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+
+      // React Refresh rules
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
 ])
