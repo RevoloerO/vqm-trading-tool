@@ -56,7 +56,7 @@ function ProgressBar({ currentStep, validation, timeframeLabels = null }) {
                     const isLast = index === steps.length - 1;
 
                     return (
-                        <React.Fragment key={step.id}>
+                        <div key={step.id} className="progress-step-wrapper">
                             <div className={`progress-step ${status}`}>
                                 <div className="progress-step-circle">
                                     {status === 'completed' ? (
@@ -77,7 +77,7 @@ function ProgressBar({ currentStep, validation, timeframeLabels = null }) {
                             {!isLast && (
                                 <div className={`progress-connector ${status === 'completed' ? 'completed' : ''}`}></div>
                             )}
-                        </React.Fragment>
+                        </div>
                     );
                 })}
             </div>

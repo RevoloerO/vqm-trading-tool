@@ -122,7 +122,7 @@ function MidTimeframeSection({
                 `${gapRule?.description || `If entering after a gap on ${timeframeName}, ensure gap is acceptable`} to avoid excessive risk.`
         },
         {
-            id: 'cleanerHigherLow',
+            id: 'cleanHigherLow',
             label: `Clean higher low if pullback setup on ${timeframeName}`,
             tooltip: `For pullback entries on ${timeframeName}, confirm a clean higher low has formed with price holding above the key support level.`
         },

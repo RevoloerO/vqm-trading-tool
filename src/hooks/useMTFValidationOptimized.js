@@ -20,7 +20,7 @@ import { calculateRiskPercent } from '../utils/TimeframeConfig';
 /**
  * OPTIMIZED hook to manage all validation logic for MTF Checklist
  */
-export function useMTFValidationOptimized(state, styleConfig) {
+export function useMTFValidationOptimized(checklistState, styleConfig, tradingStyle, timeframeConfig) {
     const [higherValidation, setHigherValidation] = useState(null);
     const [midValidation, setMidValidation] = useState(null);
     const [lowerValidation, setLowerValidation] = useState(null);
@@ -38,89 +38,89 @@ export function useMTFValidationOptimized(state, styleConfig) {
 
     // OPTIMIZATION: Memoize higher TF validation dependencies
     const higherDeps = useMemo(() => ({
-        uptrendConfirmed: state.higherTF.uptrendConfirmed,
-        above50EMA: state.higherTF.above50EMA,
-        emaAlignment: state.higherTF.emaAlignment,
-        notConsolidating: state.higherTF.notConsolidating,
-        clearFromResistance: state.higherTF.clearFromResistance
+        uptrendConfirmed: checklistState.higherTF.uptrendConfirmed,
+        above50EMA: checklistState.higherTF.above50EMA,
+        emaAlignment: checklistState.higherTF.emaAlignment,
+        notConsolidating: checklistState.higherTF.notConsolidating,
+        clearFromResistance: checklistState.higherTF.clearFromResistance
     }), [
-        state.higherTF.uptrendConfirmed,
-        state.higherTF.above50EMA,
-        state.higherTF.emaAlignment,
-        state.higherTF.notConsolidating,
-        state.higherTF.clearFromResistance
+        checklistState.higherTF.uptrendConfirmed,
+        checklistState.higherTF.above50EMA,
+        checklistState.higherTF.emaAlignment,
+        checklistState.higherTF.notConsolidating,
+        checklistState.higherTF.clearFromResistance
     ]);
 
     // Validate Higher Timeframe
     useEffect(() => {
-        if (!state.tradingStyle || !styleConfig) return;
+        if (!tradingStyle || !styleConfig) return;
 
         const validation = validateHigherTimeframe(
-            state.higherTF,
+            checklistState.higherTF,
             styleConfig.higher.name,
-            state.tradingStyle
+            tradingStyle
         );
         setHigherValidation(validation);
-    }, [higherDeps, state.tradingStyle, styleConfig]);
+    }, [higherDeps, tradingStyle, styleConfig, checklistState.higherTF]);
 
     // OPTIMIZATION: Memoize mid TF validation dependencies
     const midDeps = useMemo(() => ({
-        breakoutOrPullback: state.midTF.breakoutOrPullback,
-        aboveEMA: state.midTF.aboveEMA,
-        volumeConfirmation: state.midTF.volumeConfirmation,
-        gapAcceptable: state.midTF.gapAcceptable,
-        cleanHigherLow: state.midTF.cleanHigherLow,
-        rrAtLeast2to1: state.midTF.rrAtLeast2to1
+        breakoutOrPullback: checklistState.midTF.breakoutOrPullback,
+        aboveEMA: checklistState.midTF.aboveEMA,
+        volumeConfirmation: checklistState.midTF.volumeConfirmation,
+        gapAcceptable: checklistState.midTF.gapAcceptable,
+        cleanHigherLow: checklistState.midTF.cleanHigherLow,
+        rrAtLeast2to1: checklistState.midTF.rrAtLeast2to1
     }), [
-        state.midTF.breakoutOrPullback,
-        state.midTF.aboveEMA,
-        state.midTF.volumeConfirmation,
-        state.midTF.gapAcceptable,
-        state.midTF.cleanHigherLow,
-        state.midTF.rrAtLeast2to1
+        checklistState.midTF.breakoutOrPullback,
+        checklistState.midTF.aboveEMA,
+        checklistState.midTF.volumeConfirmation,
+        checklistState.midTF.gapAcceptable,
+        checklistState.midTF.cleanHigherLow,
+        checklistState.midTF.rrAtLeast2to1
     ]);
 
     // Validate Mid Timeframe
     useEffect(() => {
-        if (!state.tradingStyle || !styleConfig) return;
+        if (!tradingStyle || !styleConfig) return;
 
         const validation = validateMidTimeframe(
-            state.midTF,
+            checklistState.midTF,
             styleConfig.mid.name,
             styleConfig.lower.name
         );
         setMidValidation(validation);
-    }, [midDeps, state.tradingStyle, styleConfig]);
+    }, [midDeps, tradingStyle, styleConfig, checklistState.midTF]);
 
     // OPTIMIZATION: Memoize lower TF validation dependencies
     const lowerDeps = useMemo(() => ({
-        stopBelowStructure: state.lowerTF.stopBelowStructure,
-        stopDistanceOk: state.lowerTF.stopDistanceOk,
-        notAfterExtended: state.lowerTF.notAfterExtended,
-        retestOrPullback: state.lowerTF.retestOrPullback,
-        rrStillValid: state.lowerTF.rrStillValid,
-        positionSizeValid: state.lowerTF.positionSizeValid
+        stopBelowStructure: checklistState.lowerTF.stopBelowStructure,
+        stopDistanceOk: checklistState.lowerTF.stopDistanceOk,
+        notAfterExtended: checklistState.lowerTF.notAfterExtended,
+        retestOrPullback: checklistState.lowerTF.retestOrPullback,
+        rrStillValid: checklistState.lowerTF.rrStillValid,
+        positionSizeValid: checklistState.lowerTF.positionSizeValid
     }), [
-        state.lowerTF.stopBelowStructure,
-        state.lowerTF.stopDistanceOk,
-        state.lowerTF.notAfterExtended,
-        state.lowerTF.retestOrPullback,
-        state.lowerTF.rrStillValid,
-        state.lowerTF.positionSizeValid
+        checklistState.lowerTF.stopBelowStructure,
+        checklistState.lowerTF.stopDistanceOk,
+        checklistState.lowerTF.notAfterExtended,
+        checklistState.lowerTF.retestOrPullback,
+        checklistState.lowerTF.rrStillValid,
+        checklistState.lowerTF.positionSizeValid
     ]);
 
     // Validate Lower Timeframe
     useEffect(() => {
-        if (!state.tradingStyle || !styleConfig) return;
+        if (!tradingStyle || !styleConfig) return;
 
-        const maxRisk = state.tradingStyle === 'day' ? 1.0 : 2.0;
+        const maxRisk = tradingStyle === 'day' ? 1.0 : 2.0;
         const validation = validateLowerTimeframe(
-            state.lowerTF,
+            checklistState.lowerTF,
             styleConfig.lower.name,
             maxRisk
         );
         setLowerValidation(validation);
-    }, [lowerDeps, state.tradingStyle, styleConfig]);
+    }, [lowerDeps, tradingStyle, styleConfig, checklistState.lowerTF]);
 
     // Calculate Overall Recommendation
     useEffect(() => {
@@ -150,8 +150,8 @@ export function useMTFValidationOptimized(state, styleConfig) {
 
     const recommendedRiskPercent = useMemo(() =>
         higherValidation?.recommendedRisk ||
-        calculateRiskPercent(state.tradingStyle || 'swing', state.consolidationDetected),
-        [higherValidation, state.tradingStyle, state.consolidationDetected]
+        calculateRiskPercent(tradingStyle || 'swing', checklistState.consolidationDetected),
+        [higherValidation, tradingStyle, checklistState.consolidationDetected]
     );
 
     // OPTIMIZATION: Memoize validation results object
